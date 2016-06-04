@@ -15,6 +15,7 @@ void flipLED (int led);
 #define LED1 4
 #define LED2 5
 #define LED3 6
+#define LED4 0
  
 #define ON 1
 #define OFF 0
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
  
         char *code;
         char *c;
- 
+        char RecordingState = 0;
         //Initiate WiringPi and set WiringPi pins 4, 5 & 6 (GPIO 23, 24 & 25) to output. These are the pins the LEDs are connected to.
         if (wiringPiSetup () == -1)
             exit (1) ;
@@ -38,7 +39,12 @@ int main(int argc, char *argv[])
         pinMode (LED1, OUTPUT);
         pinMode (LED2, OUTPUT);
         pinMode (LED3, OUTPUT);
- 
+        pinmode (LED4, OUTPUT);
+
+
+        //Make a recordings folder (if there isn't one).
+        system("mkdir -p /home/pi/Desktop/Final_Project/audioboard/ARecord/recordings");
+
         //Initiate LIRC. Exit on failure
         if(lirc_init("lirc",1)==-1)
                 exit(EXIT_FAILURE);
@@ -119,15 +125,39 @@ int main(int argc, char *argv[])
 						buttonTimer = millis();
 					}
                                         else if(strstr (code,"KEY_PLAYPAUSE")){
-                                                printf("Uploading to DropBox\n");
-                                                flipLED(LED1);
-						flipLED(LED2);
-						flipLED(LED3);
-						system("./dropbox_uploader.sh upload /home/pi/Music/hanzo.mp3 test.mp3");
-                                                flipLED(LED1);
-						flipLED(LED2);
-						flipLED(LED3);
-						break;
+                                            while (1){
+                                                if ( RecordingState == 1 ){
+                                                    printf("[+] RECORDING! [+]");
+                                                }
+                                                else{
+                                                    printf("[+] Not Recording [+]");
+                                                }
+
+                                                printf("[+] Waiting for a button press.. [+]");
+
+                                                if ( strstr(code,"KEY_PLAYPAUSE") ) && ( RecordingState == 0 ){
+                                                    sleep (.5)
+													flipLED(LED4);
+                                                    Record();
+												}
+                                                else if ( strstr(code,"KEY_PLAYPAUSE") ) && ( RecordingState == 1 ){
+                                                    sleep (1);
+													flipLED(LED4);
+                                                    system(screen -S record -X stuff '^C');
+                                                    sleep (2);
+                                                    RecordingState = 0;
+                                                    break;
+                                                }
+                                            }
+											printf("Uploading to DropBox\n");
+											flipLED(LED1);
+											flipLED(LED2);
+											flipLED(LED3);
+											system("./dropbox_uploader.sh upload /home/pi/Music/hanzo.mp3 test.mp3");
+                                            flipLED(LED1);
+											flipLED(LED2);
+											flipLED(LED3);
+											break;
 					}
                                 }
                         }
@@ -150,4 +180,10 @@ void flipLED (int led)
         else
                 digitalWrite(led, ON);
 }
-			
+
+# Record with Arecord to a recordings folder.
+void Record(void){
+    RecordingState="1"
+    system("./save_record.sh");
+    sleep (2);
+}

@@ -9,17 +9,24 @@
 #include <lirc/lirc_client.h>
 #include <time.h>
 
+void clearLED(void);
+void cleanup(void);
 void flipLED (int led);
+void Record(void);
  
 //The WiringPi pin numbers used by our LEDs
 #define LED1 4
 #define LED2 5
 #define LED3 6
+#define LED4 0
  
 #define ON 1
 #define OFF 0
 
 #define BITS 8
+
+
+
 
 int main(int argc, char *argv[])
 {
@@ -30,15 +37,19 @@ int main(int argc, char *argv[])
  
         char *code;
         char *c;
- 
+
+
         //Initiate WiringPi and set WiringPi pins 4, 5 & 6 (GPIO 23, 24 & 25) to output. These are the pins the LEDs are connected to.
         if (wiringPiSetup () == -1)
             exit (1) ;
  
-        pinMode (LED1, OUTPUT);
-        pinMode (LED2, OUTPUT);
-        pinMode (LED3, OUTPUT);
- 
+        pinMode(LED1, OUTPUT);
+        pinMode(LED2, OUTPUT);
+        pinMode(LED3, OUTPUT);
+
+        //Make a recordings folder (if there isn't one).
+        system("mkdir -p /home/pi/Desktop/Final_Project/audioboard/ARecord/recordings");
+
         //Initiate LIRC. Exit on failure
         if(lirc_init("lirc",1)==-1)
                 exit(EXIT_FAILURE);
@@ -58,7 +69,7 @@ int main(int argc, char *argv[])
                                         if(strstr (code,"KEY_1")){
                                                 printf("-audience laughter-\n");
                                                 flipLED(LED1);
-						system("mpg123 --quiet /home/pi/Music/hanzo.mp3");
+						system("mpg123 --quiet /home/pi/Music/laugh.mp3");
 						flipLED(LED1);
                                                 buttonTimer = millis();
                                         }
@@ -119,15 +130,15 @@ int main(int argc, char *argv[])
 						buttonTimer = millis();
 					}
                                         else if(strstr (code,"KEY_PLAYPAUSE")){
-                                                printf("Uploading to DropBox\n");
-                                                flipLED(LED1);
+						printf("-Recording-\n");
+
+						flipLED(LED1);
 						flipLED(LED2);
 						flipLED(LED3);
-						system("./dropbox_uploader.sh upload /home/pi/Music/hanzo.mp3 test.mp3");
-                                                flipLED(LED1);
-						flipLED(LED2);
-						flipLED(LED3);
-						break;
+
+						Record();
+
+   						clearLED();
 					}
                                 }
                         }
@@ -139,7 +150,25 @@ int main(int argc, char *argv[])
         }
         //lirc_deinit() closes the connection to lircd and does some internal clean-up stuff.
         lirc_deinit();
+	cleanup();
+	system("./cleanup.py");
         exit(EXIT_SUCCESS);
+}
+
+void clearLED(void){
+	if(digitalRead(LED1)==ON)
+                digitalWrite(LED1, OFF);
+	if(digitalRead(LED2)==ON)
+                digitalWrite(LED2, OFF);
+	if(digitalRead(LED3)==ON)
+                digitalWrite(LED3, OFF);
+}
+
+void cleanup(){
+	clearLED();
+	pinMode(LED1, INPUT);
+        pinMode(LED2, INPUT);
+        pinMode(LED3, INPUT);
 }
 
 void flipLED (int led)
@@ -150,4 +179,9 @@ void flipLED (int led)
         else
                 digitalWrite(led, ON);
 }
-			
+
+//Record with Arecord to a recordings folder.
+void Record(void){
+    system("./save_record.sh");
+    sleep (2);
+}

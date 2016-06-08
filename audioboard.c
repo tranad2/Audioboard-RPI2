@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
         pinMode(LED2, OUTPUT);
         pinMode(LED3, OUTPUT);
 	clearLED();
+
         //Make a recordings folder (if there isn't one).
         system("mkdir -p /home/pi/Desktop/Final_Project/audioboard/ARecord/recordings");
 
@@ -60,11 +61,16 @@ int main(int argc, char *argv[])
                 //Do stuff while LIRC socket is open  0=open  -1=closed.
                 while(lirc_nextcode(&code)==0)
                 {
+			
                         //If code = NULL, meaning nothing was returned from LIRC socket,
                         //then skip lines below and start while loop again.
                         if(code==NULL) continue;{
                                 //Make sure there is a 400ms gap before detecting button presses.
                                 if (millis() - buttonTimer  > 400){
+					
+					//Add audio files below to output to audio board
+
+
                                         //Check to see if the string "KEY_1" appears anywhere within the string 'code'.
                                         if(strstr (code,"KEY_1")){
                                                 printf("-audience laughter-\n");
@@ -137,7 +143,7 @@ int main(int argc, char *argv[])
 						flipLED(LED3);
 
 						Record();
-
+						
    						clearLED();
 					}
                                 }
@@ -154,6 +160,7 @@ int main(int argc, char *argv[])
         exit(EXIT_SUCCESS);
 }
 
+//Turn off LEDs
 void clearLED(void){
 	if(digitalRead(LED1)==ON)
                 digitalWrite(LED1, OFF);
@@ -163,6 +170,7 @@ void clearLED(void){
                 digitalWrite(LED3, OFF);
 }
 
+//Cleanup resources and pins
 void cleanup(){
 	clearLED();
 	pinMode(LED1, 0);
@@ -170,6 +178,7 @@ void cleanup(){
         pinMode(LED3, 0);
 }
 
+//Flip LED switch
 void flipLED (int led)
 {
         //If LED is on, turn it off. Otherwise it is off, so thefore we need to turn it on.

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 X=$(date -d "today" +"%Y%m%d%H%M")
-echo $X
 arecord -D plughw:1,0 -f dat -vv /home/pi/Desktop/Final_Project/audioboard/ARecord/recordings/${X}_Input.wav
 
 echo "Uploading to DropBox\n"

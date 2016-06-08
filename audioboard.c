@@ -1,6 +1,5 @@
-<<<<<<< HEAD
-//TO COMPILE: gcc -o example2 example.c -lwiringPi -llirc_client
-//TO RUN: sudo ./example2
+//TO COMPILE: gcc -o audioboard audioboard.c -lwiringPi -llirc_client
+//TO RUN: sudo ./audioboard
 
 #include <wiringPi.h>
 #include <errno.h>
@@ -47,7 +46,7 @@ int main(int argc, char *argv[])
         pinMode(LED1, OUTPUT);
         pinMode(LED2, OUTPUT);
         pinMode(LED3, OUTPUT);
-
+	clearLED();
         //Make a recordings folder (if there isn't one).
         system("mkdir -p /home/pi/Desktop/Final_Project/audioboard/ARecord/recordings");
 
@@ -152,7 +151,6 @@ int main(int argc, char *argv[])
         //lirc_deinit() closes the connection to lircd and does some internal clean-up stuff.
         lirc_deinit();
 	cleanup();
-	system("./cleanup.py");
         exit(EXIT_SUCCESS);
 }
 
@@ -167,9 +165,9 @@ void clearLED(void){
 
 void cleanup(){
 	clearLED();
-	pinMode(LED1, INPUT);
-        pinMode(LED2, INPUT);
-        pinMode(LED3, INPUT);
+	pinMode(LED1, 0);
+        pinMode(LED2, 0);
+        pinMode(LED3, 0);
 }
 
 void flipLED (int led)

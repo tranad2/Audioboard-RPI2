@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 //TO COMPILE: gcc -o example2 example.c -lwiringPi -llirc_client
 //TO RUN: sudo ./example2
 

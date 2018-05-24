@@ -14,7 +14,7 @@ recording is then uploaded to the application’s Dropbox when the program is ex
 
 IR Remote & IR Receiver
 - Used to send and receive button presses to interact with the RPi’s GPIO
-Raspberry Pi 3
+Raspberry Pi 2
 - The backbone of the project
 Speakers
 - Used to output the sound files
